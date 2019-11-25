@@ -6,6 +6,7 @@
 .DS_Store
 /.build
 /Packages
+/xcuserdata
 /*.xcodeproj
 build/
 DerivedData/
@@ -25,6 +26,7 @@ xcuserdata/
 *.moved-aside
 *.xccheckout
 *.xcscmblueprint
+*.xcuserstate
 
 ## Obj-C/Swift specific
 *.hmap
