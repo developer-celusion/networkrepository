@@ -7,7 +7,13 @@
 
 import Foundation
 
-open class NetworkRepository {
+public protocol NetworkRepositoryDelegate {
+    
+    func networkRepositoryDefaultSessionHeaders() -> [String: String]?
+    
+}
+
+open class NetworkRepository: NetworkRepositoryDelegate {
     
     public static let shared = NetworkRepository()
     
@@ -24,6 +30,8 @@ open class NetworkRepository {
     var dateFormatter = DateFormatter()
     
     var oAuth2SessionRequestDelegate: OAuth2SessionRequestDelegate? = nil
+    
+    public private(set) var sessionConfiguration = URLSessionConfiguration.default
     
     private init() {
         self.setDateFormatter()
@@ -52,6 +60,7 @@ open class NetworkRepository {
         if #available(iOS 11, *) {
           configuration.waitsForConnectivity = waitsForConnectivity
         }
+        self.sessionConfiguration = configuration
         self.sharedSession = URLSession(configuration: configuration)
     }
     
@@ -65,22 +74,21 @@ open class NetworkRepository {
         self.oAuth2SessionRequestDelegate = delegate
     }
     
-    public func execute(request: SessionRequest, completion: @escaping(DataSessionResponse)->Void) {
+    private func urlRequest(for request: SessionRequest) -> URLRequest {
         var dataRequest = URLRequest(url: request.url)
         dataRequest.httpMethod = request.method.rawValue
         dataRequest.allHTTPHeaderFields = request.headers
-        if let headers = self.sessionHeaders {
-            for (key, value) in headers {
-                dataRequest.allHTTPHeaderFields?[key] = value
-            }
-        }
-        if let oAuth2Delegate = self.oAuth2SessionRequestDelegate, let headers = oAuth2Delegate.oAuth2SessionRequestHeaders() {
+        if let headers = self.networkRepositoryDefaultSessionHeaders() {
             for (key, value) in headers {
                 dataRequest.allHTTPHeaderFields?[key] = value
             }
         }
         dataRequest.httpBody = request.httpBody
-        let task = self.sharedSession.dataTask(with: dataRequest) { (data, response, error) in
+        return dataRequest
+    }
+    
+    public func execute(request: SessionRequest, completion: @escaping(DataSessionResponse)->Void) {
+        let task = self.sharedSession.dataTask(with: urlRequest(for:request)) { (data, response, error) in
             DispatchQueue.main.async {
                 let sessionResponse = DataSessionResponse(sessionRequest: request, data: data, response: response, error: error)
                 guard error == nil else {
@@ -107,12 +115,40 @@ open class NetworkRepository {
         
     }
     
+    public func networkRepositoryDefaultSessionHeaders() -> [String : String]? {
+        var allHTTPHeaderFields = [String: String]()
+        if let headers = self.sessionHeaders {
+            for (key, value) in headers {
+                allHTTPHeaderFields[key] = value
+            }
+        }
+        if let oAuth2Delegate = self.oAuth2SessionRequestDelegate, let headers = oAuth2Delegate.oAuth2SessionRequestHeaders() {
+            for (key, value) in headers {
+                allHTTPHeaderFields[key] = value
+            }
+        }
+        return allHTTPHeaderFields.count > 0 ? allHTTPHeaderFields : nil
+    }
+    
 }
 
 extension SessionRequest {
     
     public func execute(completion: @escaping(DataSessionResponse)->Void) {
         NetworkRepository.shared.execute(request: self, completion: completion)
+    }
+    
+    public func urlRequest(delegate: NetworkRepositoryDelegate)-> URLRequest {
+        var dataRequest = URLRequest(url: self.url)
+        dataRequest.httpMethod = self.method.rawValue
+        dataRequest.allHTTPHeaderFields = self.headers
+        if let headers = delegate.networkRepositoryDefaultSessionHeaders() {
+            for (key, value) in headers {
+                dataRequest.allHTTPHeaderFields?[key] = value
+            }
+        }
+        dataRequest.httpBody = self.httpBody
+        return dataRequest
     }
     
 }
