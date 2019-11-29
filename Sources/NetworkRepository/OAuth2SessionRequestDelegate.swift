@@ -25,4 +25,6 @@ public protocol OAuth2SessionRequestDelegate {
     
     func oAuth2SessionRequestHeaders()->[String: String]?
     
+    func oAuth2SessionRefreshToken(completion: @escaping(Bool)->Void)
+    
 }
