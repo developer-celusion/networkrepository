@@ -127,8 +127,16 @@ extension SessionRequest {
      Set http body by converting Array of dictionary into JSON Data
      */
     public func setHttpBody(items: [[String: Any]]) {
+        let newHeaders = SessionRequest.HEADER_JSON_ENCODING
         if let data = items.dataValue {
             self.httpBody = data
+        }
+        if let headers = self.headers, headers.count > 0 {
+            for (key,value) in newHeaders {
+                self.headers?[key] = value
+            }
+        } else {
+            self.headers = newHeaders
         }
     }
     
