@@ -102,11 +102,14 @@ open class NetworkRepository: NetworkRepositoryDelegate {
                 if let response = (response as? HTTPURLResponse) {
                     sessionResponse.statusCode = response.statusCode
                 }
-                completion(sessionResponse)
                 if let oAuth2Delegate = self.oAuth2SessionRequestDelegate {
                     if sessionResponse.statusCode == Int.UNAUTHORISED {
                         oAuth2Delegate.unauthoriseOAuth2SessionRequestFor(request, oldRequestCompletion: completion)
+                    } else {
+                        completion(sessionResponse)
                     }
+                } else {
+                    completion(sessionResponse)
                 }
             }
         }
