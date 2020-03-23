@@ -66,6 +66,11 @@ class ViewController: UIViewController {
 
 extension ViewController: OAuth2SessionRequestDelegate {
     
+    func oAuth2SessionRefreshToken(completion: @escaping (Bool) -> Void) {
+        
+    }
+    
+    
     func unauthoriseOAuth2SessionRequestFor(_ oldRequest: SessionRequest, oldRequestCompletion: @escaping (DataSessionResponse) -> Void) {
         //MARK: Refresh Token
         if let headers = self.tokenHeaders {

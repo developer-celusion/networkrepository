@@ -53,18 +53,23 @@ public class SessionRequest {
     public static let HEADER_X_WWW_FORM_ENCODING = [SessionHeader.HEADER_KEY_CONTENT_TYPE: SessionHeader.FORM_URL_ENCODING.rawValue]
     public static let HEADER_JSON_ENCODING = [SessionHeader.HEADER_KEY_CONTENT_TYPE: SessionHeader.JSON.rawValue]
     
+    public static let PRIORITY_HIGH = URLSessionTask.highPriority
+    public static let PRIORITY_LOW = URLSessionTask.lowPriority
+    
     var identifier: String = UUID().uuidString
     var url: URL
     var method: URLSessionMethod = .GET
     var headers: [String: String]? = nil
     var httpBody: Data? = nil
+    var priority: Float = URLSessionTask.defaultPriority
     
-    public init(identifier: String = UUID().uuidString, url: URL, method: URLSessionMethod = .GET, headers: [String: String]? = nil, httpBody: Data? = nil) {
+    public init(identifier: String = UUID().uuidString, url: URL, method: URLSessionMethod = .GET, headers: [String: String]? = nil, httpBody: Data? = nil, priority: Float = URLSessionTask.defaultPriority) {
         self.identifier = identifier
         self.url = url
         self.method = method
         self.headers = headers
         self.httpBody = httpBody
+        self.priority = priority
     }
     
 }

@@ -114,6 +114,7 @@ open class NetworkRepository: NetworkRepositoryDelegate {
             }
         }
         task.taskDescription = request.identifier
+        task.priority = request.priority
         task.resume()
         
     }
