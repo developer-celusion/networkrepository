@@ -19,7 +19,9 @@ open class NetworkRepository: NetworkRepositoryDelegate {
     
     private var sharedSession = URLSession.shared
     
-    private var dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZZZZZ"
+    private var encodingDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZZZZZ"
+    
+    private var decodingDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZZZZZ"
     
     private var sessionHeaders: [String: String]? = nil
     
@@ -27,29 +29,80 @@ open class NetworkRepository: NetworkRepositoryDelegate {
     
     var decoder = JSONDecoder()
     
-    var dateFormatter = DateFormatter()
+    // MARK: Deprecated
+    // var dateFormatter = DateFormatter()
     
     var oAuth2SessionRequestDelegate: OAuth2SessionRequestDelegate? = nil
     
     public private(set) var sessionConfiguration = URLSessionConfiguration.default
+    
+    //MARK: UTC Date Conversion
+    private var encodingDateFormatter = DateFormatter()
+    
+    private var decodingDateFormatter = DateFormatter()
+    
+    private var encodingInUTC = false
+    
+    private var decodingInUTC = false
+    
+    //MARK: Logs
+    var enableLogs = false
     
     private init() {
         self.setDateFormatter()
         self.timeout(60.0)
     }
     
+    // MARK: Deprecated
+//    private func setDateFormatter() {
+//        dateFormatter = DateFormatter()
+//        dateFormatter.dateFormat = self.dateFormat
+//        dateFormatter.calendar = Calendar(identifier: .iso8601)
+//        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+//        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+//        encoder.dateEncodingStrategy = .formatted(dateFormatter)
+//        decoder.dateDecodingStrategy = .formatted(dateFormatter)
+//    }
+    
     private func setDateFormatter() {
-        dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = self.dateFormat
-        dateFormatter.calendar = Calendar(identifier: .iso8601)
-        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        encoder.dateEncodingStrategy = .formatted(dateFormatter)
-        decoder.dateDecodingStrategy = .formatted(dateFormatter)
+        encodingDateFormatter = DateFormatter()
+        encodingDateFormatter.dateFormat = self.encodingDateFormat
+        encodingDateFormatter.calendar = Calendar.current
+        if self.encodingInUTC {
+            encodingDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        } else {
+            encodingDateFormatter.timeZone = TimeZone.current
+        }
+        encodingDateFormatter.locale = Locale.current
+        encoder.dateEncodingStrategy = .formatted(encodingDateFormatter)
+        
+        decodingDateFormatter = DateFormatter()
+        decodingDateFormatter.dateFormat = self.decodingDateFormat
+        decodingDateFormatter.calendar = Calendar.current
+        if self.decodingInUTC {
+            decodingDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        } else {
+            decodingDateFormatter.timeZone = TimeZone.current
+        }
+        decodingDateFormatter.locale = Locale.current
+        decoder.dateDecodingStrategy = .formatted(decodingDateFormatter)
     }
     
     public func dateFormat(format:String) {
-        self.dateFormat = format
+        self.encodingDateFormat = format
+        self.decodingDateFormat = format
+        setDateFormatter()
+    }
+    
+    public func dateFormat(encodingFormat:String, decodingFormat: String) {
+        self.encodingDateFormat = encodingFormat
+        self.decodingDateFormat = decodingFormat
+        setDateFormatter()
+    }
+    
+    public func utcDateFormatFor(encodingInUTC: Bool = false, decodingInUTC: Bool = false) {
+        self.encodingInUTC = encodingInUTC
+        self.decodingInUTC = decodingInUTC
         setDateFormatter()
     }
     

@@ -21,6 +21,10 @@ extension Encodable {
         do {
             return try NetworkRepository.shared.encoder.encode(self)
         } catch {
+            if NetworkRepository.shared.enableLogs {
+                print("Data Value Encodable Network Repository ->")
+                print(error)
+            }
             return nil
         }
     }
@@ -83,6 +87,10 @@ extension Dictionary where Key == String, Value == Any  {
         do {
             return try JSONSerialization.data(withJSONObject: self)
         } catch {
+            if NetworkRepository.shared.enableLogs {
+                print("Data Value Network Repository ->")
+                print(error)
+            }
             return nil
         }
     }
@@ -133,6 +141,10 @@ extension Array where Element == [String: Any] {
         do {
             return try JSONSerialization.data(withJSONObject: self)
         } catch {
+            if NetworkRepository.shared.enableLogs {
+                print("Array Data Value Network Repository ->")
+                print(error)
+            }
             return nil
         }
     }
@@ -253,6 +265,10 @@ extension Data {
         do {
             return try JSONSerialization.jsonObject(with: self, options: []) as? [String: Any]
         } catch {
+            if NetworkRepository.shared.enableLogs {
+                print("Dict Value Network Repository ->")
+                print(error)
+            }
             return nil
         }
     }
@@ -268,6 +284,10 @@ extension Data {
         do {
             return try JSONSerialization.jsonObject(with: self, options: []) as? [[String: Any]]
         } catch {
+            if NetworkRepository.shared.enableLogs {
+                print("Array Value Network Repository ->")
+                print(error)
+            }
             return nil
         }
     }
@@ -284,6 +304,10 @@ extension Data {
             let item = try NetworkRepository.shared.decoder.decode(T.self, from: self)
             return item
         } catch {
+            if NetworkRepository.shared.enableLogs {
+                print("Parse Network Repository ->")
+                print(error)
+            }
             return nil
         }
     }
@@ -300,6 +324,10 @@ extension Data {
             let item = try NetworkRepository.shared.decoder.decode([T].self, from: self)
             return item
         } catch {
+            if NetworkRepository.shared.enableLogs {
+                print("Parse Array Network Repository ->")
+                print(error)
+            }
             return nil
         }
     }
