@@ -25,7 +25,7 @@ Once you have your Swift package set up, adding Alamofire as a dependency is as 
 
 ```ruby
 dependencies: [
-    .package(url: "https://github.com/developer-celusion/networkrepository.git", from: "1.0.7")
+    .package(url: "https://github.com/developer-celusion/networkrepository.git", from: "1.0.8")
 ]
 ```
 

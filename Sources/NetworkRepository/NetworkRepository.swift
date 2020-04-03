@@ -46,7 +46,7 @@ open class NetworkRepository: NetworkRepositoryDelegate {
     private var decodingInUTC = false
     
     //MARK: Logs
-    var enableLogs = false
+    public var enableLogs = false
     
     private init() {
         self.setDateFormatter()
