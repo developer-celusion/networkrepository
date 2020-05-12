@@ -123,6 +123,10 @@ open class NetworkRepository: NetworkRepositoryDelegate {
         }
     }
     
+    public func resetSessionHeaders() {
+        self.sessionHeaders = nil
+    }
+    
     public func setOAuth2Delegate(delegate: OAuth2SessionRequestDelegate) {
         self.oAuth2SessionRequestDelegate = delegate
     }
