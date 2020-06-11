@@ -13,6 +13,14 @@ public protocol NetworkRepositoryDelegate {
     
 }
 
+public protocol NetworkSessionConnectionDelegate {
+    
+    func networkSessionConnectionNoInternet(_ sessionResponse: DataSessionResponse?)
+    
+    func networkSessionConnectionTimeout(_ sessionResponse: DataSessionResponse?)
+    
+}
+
 open class NetworkRepository: NetworkRepositoryDelegate {
     
     public static let shared = NetworkRepository()
@@ -33,6 +41,8 @@ open class NetworkRepository: NetworkRepositoryDelegate {
     // var dateFormatter = DateFormatter()
     
     var oAuth2SessionRequestDelegate: OAuth2SessionRequestDelegate? = nil
+    
+    var networkSessionConnectionDelegate: NetworkSessionConnectionDelegate? = nil
     
     public private(set) var sessionConfiguration = URLSessionConfiguration.default
     
@@ -131,6 +141,10 @@ open class NetworkRepository: NetworkRepositoryDelegate {
         self.oAuth2SessionRequestDelegate = delegate
     }
     
+    public func setConnectionDelegate(delegate: NetworkSessionConnectionDelegate) {
+        self.networkSessionConnectionDelegate = delegate
+    }
+    
     private func urlRequest(for request: SessionRequest) -> URLRequest {
         var dataRequest = URLRequest(url: request.url)
         dataRequest.httpMethod = request.method.rawValue
@@ -149,7 +163,20 @@ open class NetworkRepository: NetworkRepositoryDelegate {
             DispatchQueue.main.async {
                 let sessionResponse = DataSessionResponse(sessionRequest: request, data: data, response: response, error: error)
                 guard error == nil else {
-                    completion(sessionResponse)
+                    if let nsError = error as? NSError {
+                        sessionResponse.statusCode = nsError.code
+                        if(nsError.code == NSURLErrorNotConnectedToInternet) {
+                            networkSessionConnectionDelegate?.networkSessionConnectionNoInternet(sessionResponse)
+                            return
+                        }
+                        if(nsError.code == NSURLErrorTimedOut) {
+                            networkSessionConnectionDelegate?.networkSessionConnectionTimeout(sessionResponse)
+                            return
+                        }
+                        completion(sessionResponse)
+                    } else {
+                        completion(sessionResponse)
+                    }
                     return
                 }
                 guard data != nil else {
