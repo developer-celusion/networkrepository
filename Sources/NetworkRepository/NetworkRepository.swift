@@ -163,14 +163,14 @@ open class NetworkRepository: NetworkRepositoryDelegate {
             DispatchQueue.main.async {
                 let sessionResponse = DataSessionResponse(sessionRequest: request, data: data, response: response, error: error)
                 guard error == nil else {
-                    if let nsError = error as? NSError {
+                    if let nsError = error as NSError? {
                         sessionResponse.statusCode = nsError.code
                         if(nsError.code == NSURLErrorNotConnectedToInternet) {
-                            networkSessionConnectionDelegate?.networkSessionConnectionNoInternet(sessionResponse)
+                            self.networkSessionConnectionDelegate?.networkSessionConnectionNoInternet(sessionResponse)
                             return
                         }
                         if(nsError.code == NSURLErrorTimedOut) {
-                            networkSessionConnectionDelegate?.networkSessionConnectionTimeout(sessionResponse)
+                            self.networkSessionConnectionDelegate?.networkSessionConnectionTimeout(sessionResponse)
                             return
                         }
                         completion(sessionResponse)
