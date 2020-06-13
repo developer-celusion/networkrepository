@@ -117,6 +117,17 @@ open class NetworkRepository: NetworkRepositoryDelegate {
     }
     
     public func timeout(_ timeoutInterval: TimeInterval, waitsForConnectivity: Bool = true) {
+//        let configuration = URLSessionConfiguration.default
+//        configuration.timeoutIntervalForRequest = timeoutInterval
+//        configuration.timeoutIntervalForResource = timeoutInterval
+//        if #available(iOS 11, *) {
+//          configuration.waitsForConnectivity = waitsForConnectivity
+//        }
+//        self.sessionConfiguration = configuration
+        self.setup(timeoutInterval, waitsForConnectivity: waitsForConnectivity, delegate: nil, delegateQueue: nil)
+    }
+    
+    public func setup(_ timeoutInterval: TimeInterval, waitsForConnectivity: Bool = true, delegate sessionDelegate: URLSessionDelegate? = nil, delegateQueue sessionQueue: OperationQueue? = nil) {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = timeoutInterval
         configuration.timeoutIntervalForResource = timeoutInterval
@@ -124,7 +135,7 @@ open class NetworkRepository: NetworkRepositoryDelegate {
           configuration.waitsForConnectivity = waitsForConnectivity
         }
         self.sessionConfiguration = configuration
-        self.sharedSession = URLSession(configuration: configuration)
+        self.sharedSession = URLSession(configuration: configuration, delegate: sessionDelegate, delegateQueue: sessionQueue)
     }
     
     public func setSessionHeaders(_ headers: [String: String]) {
