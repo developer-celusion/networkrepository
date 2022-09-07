@@ -136,12 +136,17 @@ open class NetworkRepository: NetworkRepositoryDelegate {
         }
         self.sessionConfiguration = configuration
         self.sharedSession = URLSession(configuration: configuration, delegate: sessionDelegate, delegateQueue: sessionQueue)
+        self.sharedSession.sessionDescription = "NetworkRepositorySession"
     }
     
     public func setSessionHeaders(_ headers: [String: String]) {
         if headers.count > 0 {
             self.sessionHeaders = headers
         }
+    }
+    
+    public func getAllTasks(completion: @escaping(([URLSessionTask]) -> Void)) {
+        self.sharedSession.getAllTasks(completionHandler: completion)
     }
     
     public func resetSessionHeaders() {
